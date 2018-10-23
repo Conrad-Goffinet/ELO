@@ -16,29 +16,9 @@ app = dash.Dash(external_stylesheets=external_stylesheets)
 
 app.layout = html.Div([
             html.H2(children = 'Pong Stats'),
-            html.Table(
-            # Header
-            [html.Tr([html.Th(col) for col in table.columns])] +
-
-            # Body
-            [html.Tr([
-                html.Td(table.iloc[i][col]) for col in table.columns
-            ]) for i in range(len(table))]
+            html.Table(id = 'data_table', children =
+            create_html_table(table)
             ),
-                
-            
-            
-            html.H2(children = 'Enter a New Name or Kerb'),
-            dcc.Input(
-                id = 'kerb',
-                placeholder='Enter a name/kerb',
-                type='text',
-                value=''
-            ),
-            
-
-            html.Button(id='kerb_button', children='Submit'),
-            html.Div(id='announcement', children = 'Foo'),
             html.H2(children = 'Game Input'),
             html.H3(children = 'Winning Team'),
             dcc.Dropdown(
@@ -48,7 +28,7 @@ app.layout = html.Div([
             ),
             dcc.Input(
                 id = 'player1_score',
-                placeholder = 'Number of Cups sank by Player 1',
+                placeholder = 'Cups',
                 type = 'number',
                 value = [i for i in range(11)]
             ),
@@ -59,7 +39,7 @@ app.layout = html.Div([
             ),
             dcc.Input(
                 id = 'player2_score',
-                placeholder = 'Number of Cups sank by Player 2',
+                placeholder = 'Cups',
                 type = 'number',
                 value = [i for i in range(11)]
             ),
@@ -71,7 +51,7 @@ app.layout = html.Div([
             ),
             dcc.Input(
                 id = 'player3_score',
-                placeholder = 'Number of Cups sank by Player 3',
+                placeholder = 'Cups',
                 type = 'number',
                 value = [i for i in range(11)]
             ),
@@ -82,28 +62,25 @@ app.layout = html.Div([
             ),
             dcc.Input(
                 id = 'player4_score',
-                placeholder = 'Number of Cups sank by Player 4',
+                placeholder = 'Cups',
                 type = 'number',
                 value = [i for i in range(11)]
             ),
             html.Button('Submit Game', id='submit_button'),
-            html.Div(id='game_played', children='Foo')
+            html.Div(id='game_played', children=''),
+            html.H2(children = 'Enter a New Name or Kerb'),
+            dcc.Input(
+                id = 'kerb',
+                placeholder='Enter a name/kerb',
+                type='text',
+                value=''
+            ),
+            
+
+            html.Button(id='kerb_button', children='Submit'),
+            html.Div(id='announcement', children = '')
         ])
 
-
-@app.callback(
-    # Addition of a player
-    Output(component_id='announcement', component_property='children'),
-    [Input(component_id='kerb_button', component_property='n_clicks')],
-    [State(component_id='kerb', component_property = 'value' )]
-)
-def create_kerb(clicks, name):
-    if clicks is not None:
-        #Avoids errors with typing inputs
-        data.add_player(Player(name))
-        print('callback fired', data.players)
-        pickle.dump(data, open( "data.p", "wb" ) )
-        return name
 
 @app.callback(
     # Changing the dropdown menu for player one
@@ -162,6 +139,11 @@ def submit_game(clicks, player1_name, player1_score,
                 player4_name, player4_score):
 
     if clicks is not None:
+
+        if player1_score + player2_score != 10 or player3_score + player4_score >= 10:
+            # Catching incorrect cup values
+            # Note: a winner must be chosen. No ties. Games can only be played to 10, so no redemption
+            return 'Error in Game'
         team1 = ((data.fetch_player(player1_name), player1_score),(data.fetch_player(player2_name), player2_score))
         team2 = ((data.fetch_player(player3_name), player3_score),(data.fetch_player(player4_name), player4_score))
 
@@ -171,6 +153,32 @@ def submit_game(clicks, player1_name, player1_score,
         pickle.dump(data, open( "data.p", "wb" ) )
 
     return 'Game Played'
+
+@app.callback(
+    # Updataing the data table after a played game
+    Output(component_id = 'data_table', component_property = 'children'),
+    [Input(component_id = 'game_played', component_property = 'children')]
+)
+def update_table(_):
+    table = create_data_table(data)
+    return create_html_table(table)
+
+@app.callback(
+    # Addition of a player
+    Output(component_id='announcement', component_property='children'),
+    [Input(component_id='kerb_button', component_property='n_clicks')],
+    [State(component_id='kerb', component_property = 'value' )]
+)
+def create_kerb(clicks, name):
+    if clicks is not None and name:
+        #Avoids errors with typing inputs
+        data.add_player(Player(name))
+        print('callback fired', data.players)
+        pickle.dump(data, open( "data.p", "wb" ) )
+        return name
+    # Solves issue of initiating the app so that people can 
+    # be chosen. 95% sure bug in Dash
+    return 'Initiated'
 
 if __name__ == '__main__':
     app.run_server(debug=True)
