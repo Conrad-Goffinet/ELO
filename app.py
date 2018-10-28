@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import dash
 import dash_html_components as html
 import dash_core_components as dcc
@@ -189,7 +190,7 @@ def submit_game(clicks, player1_name, player1_score,
             # Note: a winner must be chosen. No ties. Games can only be played to 10, so no redemption
             return 'Error in cups'
         
-        elif len(set(player1_name, player2_name, player3_name, player4_name)) != 4:
+        elif len({player1_name, player2_name, player3_name, player4_name}) != 4:
             return 'Error in players'
 
         team1 = ((data.fetch_player(player1_name), player1_score),(data.fetch_player(player2_name), player2_score))
