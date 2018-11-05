@@ -127,8 +127,10 @@ class Database:
         for player in self.players:
             if player.name == name:
                 return player
+
+    def remove_player(self, name):
+        self.players.pop(self.players.index(self.fetch_player(name)))
         
-            
     def create_player_name_list(self):
         '''Creates a list of names from a list of player
         objects'''
