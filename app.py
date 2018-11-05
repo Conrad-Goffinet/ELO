@@ -14,7 +14,7 @@ table = create_data_table(data)
     
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(external_stylesheets=external_stylesheets)
-
+server = app.server
 
 # Anytime a player is referenced in this file, it refers to the string.
 # To created the object, fetch_player() must be called--this must be done
