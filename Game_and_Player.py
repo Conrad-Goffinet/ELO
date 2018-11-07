@@ -102,7 +102,7 @@ class Player:
         return (self.name, self.wins, self.losses, self.gp, self.pelo, self.avg_mov, self.avg_score)
 
     def get_statistics_names(self):
-        return ('Name', 'Wins', 'Losses', 'Games Played', 'PELO', 'Avg MOV', 'Avg Score')
+        return ('Name', 'Wins', 'Losses', 'Games_Played', 'PELO', 'Avg_MOV', 'Avg_Score')
 
 class Database:
     def __init__(self):
